@@ -66,6 +66,13 @@ def convert_to_strings(df):
             # paragraph += line['Line']
             # TODO these are all different
         i += 1
+    for paragraph in output:
+        i = 0
+        n = 10
+        paragraph.replace('<->', '.')
+        paragraph.replace('<$>', '')
+        paragraph = paragraph.split('.')
+ 
     return output
 
 def get_levenshtein(pair):
@@ -137,12 +144,7 @@ def gen_comps(str_list_output, neg_dist=1):
     word_comp = defaultdict(list)
     comp_count = defaultdict(lambda: 0)
     for paragraph in str_list_output:
-        i = 0
-        n = 10
-        paragraph.replace('<->', '.')
-        paragraph.replace('<$>', '')
-        paragraph = paragraph.split('.')
-        while i < len(paragraph) - n:
+       while i < len(paragraph) - n:
             window = paragraph[i:i + n]
             word1 = window[0]
             for k, word_2 in enumerate(window[1:]):
