@@ -254,8 +254,8 @@ def evaluate_corpus(file, num_lines=6000, hand='Both', voynich=False):
 
 
 def main():
-    corpora = ['war_peace.txt', 'don_quixote.txt', 'great_expectations.txt']
-    voynich_file = 'voynich_data.txt'
+    corpora = ['data/war_peace.txt', 'data/don_quixote.txt', 'data/great_expectations.txt']
+    voynich_file = 'data/voynich_data.txt'
 
     corpora_output = {}
 
