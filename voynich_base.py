@@ -225,6 +225,7 @@ def analysis(word_comp, comp_count, n=10000):
 
     stdevs = {a:statistics.stdev(top_comps[a]) for a in top_comps.keys()}
     median_dist = {a:statistics.median(top_comps[a]) for a in top_comps.keys()}
+    # mode_dist = {a:statistics.mode(top_comps[a]) for a in top_comps.keys()}
 
     # lowest_stdevs = heapq.nsmallest(10, stdevs)
     # highest_stdevs = heapq.nlargest(10, stdevs)
@@ -240,25 +241,43 @@ def analysis(word_comp, comp_count, n=10000):
     # y1 = [comp_count[item] for item in stdevs.keys()]
     # y2 = [median_dist[item] for item in stdevs.keys()]
 
-    return topitemsdict, stdevs, levenshteins_top
+    return topitemsdict, stdevs, levenshteins_top, comp_count
 
 
+def evaluate_corpus(file, num_lines=6000, hand='Both', voynich=False):
+    if voynich:
+        paragraphs = create_df(file, hand)
+    else:
+        paragraphs = convert_to_strings(file, num_lines)
+    word_comp, comp_count = gen_comps(paragraphs)
+    return analysis(word_comp, comp_count)
 
-def main(hand='Both'):
-    f = 'voynich_data.txt'
+
+def main():
+    corpora = ['war_peace_test.txt']
+    voynich_file = 'voynich_data.txt'
+
+    corpora_output = {}
+
+    for corpus in corpora:
+        corpora_output[corpus] = evaluate_corps(corpus)
+
+    topitems_v, stdevs_v, lev_top_v, comp_count_v = evaluate_corpus(voynich_file, voynich=True)
+
+    # f = 'voynich_data.txt'
  
-    str_list_output = create_df(f, hand)
-    # count_bad = sum([not c.isalnum() for paragraph in str_list_output for c in paragraph])
-    # count_good = sum([c.isalnum() for paragraph in str_list_output for c in paragraph])
-    word_comp, comp_count = gen_comps(str_list_output)
-    topitems, stdevs, levenshteins = analysis(word_comp, comp_count)
+    # str_list_output = create_df(f, hand)
+    # # count_bad = sum([not c.isalnum() for paragraph in str_list_output for c in paragraph])
+    # # count_good = sum([c.isalnum() for paragraph in str_list_output for c in paragraph])
+    # word_comp, comp_count = gen_comps(str_list_output)
+    # topitems, stdevs, levenshteins = analysis(word_comp, comp_count)
 
-    war_peace_strs = convert_to_strings('war_peace_test.txt', 6000)
-    word_comp_eng, comp_count_eng = gen_comps(war_peace_strs)
-    # word_comp_eng = {a:word_comp_eng[a] if word_comp_eng[a] !=0 for a in word_comp_eng.keys()]
-    topitems_eng, stdevs_eng, levenshteins_eng = analysis(word_comp_eng, comp_count_eng)
+    # war_peace_strs = convert_to_strings('war_peace_test.txt', 6000)
+    # word_comp_eng, comp_count_eng = gen_comps(war_peace_strs)
+    # # word_comp_eng = {a:word_comp_eng[a] if word_comp_eng[a] !=0 for a in word_comp_eng.keys()]
+    # topitems_eng, stdevs_eng, levenshteins_eng = analysis(word_comp_eng, comp_count_eng)
 
-    return topitems, comp_count, word_comp, stdevs, levenshteins
+    # return topitems, comp_count, word_comp, stdevs, levenshteins
 
 if __name__ == "__main__":
-    topitems, comp_count, word_comp, stdevs, levenshteins = main()
+    main()
