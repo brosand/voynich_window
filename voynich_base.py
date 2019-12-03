@@ -262,7 +262,9 @@ def main():
     for corpus in corpora:
         corpora_output[corpus] = evaluate_corpus(corpus)
 
-    topitems_v, stdevs_v, lev_top_v, comp_count_v = evaluate_corpus(voynich_file, voynich=True)
+    corpora_output[voynich_file] = evaluate_corpus(voynich_file, voynich=True)
+    return corpora_output
+
 
 if __name__ == "__main__":
-    main()
+    data = main()
