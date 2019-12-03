@@ -44,13 +44,15 @@ def parse_line(line):
         parsed = list(parsed) + ([''] * (line_type - 2))
     return parsed, line_type
 
+
 def convert_to_strings(big_text, line_count=5000):
+
     with open(big_text) as corpus:
         paragraphs = []
         line = corpus.readline().rstrip('\n').rstrip('.')
         cur_paragraph = []
-        i=0
-        while line and i<line_count:
+        i = 0
+        while line and i < line_count:
             cur_paragraph = cur_paragraph + line.split(' ')
             line = corpus.readline()
             if not line or line == '\n':
@@ -60,7 +62,6 @@ def convert_to_strings(big_text, line_count=5000):
                 line = line.rstrip('\n').rstrip('.')
         i += 1
         return paragraphs
-
 
 
 def convert_to_strings_voynich(df):
@@ -89,8 +90,9 @@ def convert_to_strings_voynich(df):
         output[k] = paragraph.replace('<->', '.')
         output[k] = paragraph.replace('<\\$>', '')
         output[k] = paragraph.split('.')
- 
+
     return output
+
 
 def get_levenshtein(pair):
     if not (pair[0].isalpha() and pair[1].isalpha()):
@@ -98,32 +100,33 @@ def get_levenshtein(pair):
     seq1, seq2 = pair
     size_x = len(seq1) + 1
     size_y = len(seq2) + 1
-    matrix = np.zeros ((size_x, size_y))
+    matrix = np.zeros((size_x, size_y))
     for x in range(size_x):
-        matrix [x, 0] = x
+        matrix[x, 0] = x
     for y in range(size_y):
-        matrix [0, y] = y
+        matrix[0, y] = y
 
     for x in range(1, size_x):
         for y in range(1, size_y):
             if seq1[x-1] == seq2[y-1]:
-                matrix [x,y] = min(
+                matrix[x, y] = min(
                     matrix[x-1, y] + 1,
                     matrix[x-1, y-1],
                     matrix[x, y-1] + 1
                 )
             else:
-                matrix [x,y] = min(
-                    matrix[x-1,y] + 1,
-                    matrix[x-1,y-1] + 1,
-                    matrix[x,y-1] + 1
+                matrix[x, y] = min(
+                    matrix[x-1, y] + 1,
+                    matrix[x-1, y-1] + 1,
+                    matrix[x, y-1] + 1
                 )
     # print (matrix)
     return (matrix[size_x - 1, size_y - 1])
 
+
 def create_df(file, hand):
     with open(file) as corpus:
-        row = 0
+        # row = 0
         parsed_lines = []
         line = corpus.readline()
         line_def, line_type = parse_line(line)
@@ -144,20 +147,22 @@ def create_df(file, hand):
             else:
                 raise NotImplementedError("This Line Type Not implemented")
             # row += 1
-    column_names = ['Folio', 'Empty1', 'I', 'Q', 'P', 'L', 'H', 'X', 'Empty2', 'Folio', 'Ending', 'Line']
+    column_names = ['Folio', 'Empty1', 'I', 'Q', 'P', 'L', 'H', 'X', 'Empty2',
+                    'Folio', 'Ending', 'Line']
     df = pd.DataFrame(parsed_lines, columns=column_names)
     df.drop(['Empty1', 'Empty2'], axis=1, inplace=True)
     df['Line'] = df['Line'].apply(lambda s: s.lstrip())
     df['Line'] = df['Line'].apply(lambda s: s.rstrip())
     A_df = df[df['H'] == '1']
     B_df = df[df['H'] == '2']
-    if hand=='A':
+    if hand == 'A':
         str_list_output = convert_to_strings_voynich(A_df)
-    if hand=='B':
+    if hand == 'B':
         str_list_output = convert_to_strings_voynich(B_df)
     else:
         str_list_output = convert_to_strings_voynich(df)
     return str_list_output
+
 
 def gen_comps(str_list_output, neg_dist=1):
     word_comp = defaultdict(list)
@@ -172,26 +177,26 @@ def gen_comps(str_list_output, neg_dist=1):
                 if comp_count[word1, word_2] == 0:
                     if comp_count[word_2, word1] == 0:
                         word_comp[word1, word_2].append(k)
-                        comp_count[word1,word_2] += 1
+                        comp_count[word1, word_2] += 1
                     else:
                         word_comp[word_2, word1].append(neg_dist * k)
                         comp_count[word_2, word1] += 1
                 else:
                     word_comp[word1, word_2].append(k)
-                    comp_count[word1,word_2] += 1
+                    comp_count[word1, word_2] += 1
             i += 1
         for k, word1 in enumerate(paragraph[i:]):
             for m, word_2 in enumerate(paragraph[(i+k+1):]):
                 if comp_count[word1, word_2] == 0:
                     if comp_count[word_2, word1] == 0:
                         word_comp[word1, word_2].append(m)
-                        comp_count[word1,word_2] += 1
+                        comp_count[word1, word_2] += 1
                     else:
                         word_comp[word_2, word1].append(neg_dist * m)
                         comp_count[word_2, word1] += 1
                 else:
                     word_comp[word1, word_2].append(m)
-                    comp_count[word1,word_2] += 1
+                    comp_count[word1, word_2] += 1
 
             # for k, word in enumerate(window):
             #     for m, word_2 in enumerate(window[(k+1):]):
@@ -211,30 +216,31 @@ def gen_comps(str_list_output, neg_dist=1):
             #     word_comb[comb].append(dist)
     return word_comp, comp_count
 
+
 def analysis(word_comp, comp_count, n=10000):
 
     topitems = heapq.nlargest(n, comp_count.items(), key=itemgetter(1))
 
     topitemsdict = dict(topitems)
-    topitemsdict = {item: topitemsdict[item] for item in topitemsdict.keys() if (item[0].isalpha() and item[1].isalpha())}
+    topitemsdict = {item: topitemsdict[item] for item in topitemsdict.keys()
+                    if (item[0].isalpha() and item[1].isalpha())}
     top_comps = {item: word_comp[item] for item in topitemsdict.keys()}
 
-
-    pair = list(top_comps.keys())[0]
+    # pair = list(top_comps.keys())[0]
     # vis = top_comps[pair]
 
-    stdevs = {a:statistics.stdev(top_comps[a]) for a in top_comps.keys()}
-    median_dist = {a:statistics.median(top_comps[a]) for a in top_comps.keys()}
+    stdevs = {a: statistics.stdev(top_comps[a]) for a in top_comps.keys()}
+    # median_dist = {a: statistics.median(top_comps[a]) for a in top_comps.keys()}
     # mode_dist = {a:statistics.mode(top_comps[a]) for a in top_comps.keys()}
 
     # lowest_stdevs = heapq.nsmallest(10, stdevs)
     # highest_stdevs = heapq.nlargest(10, stdevs)
-    
 
     # m = min(stdevs, key=stdevs.get)
 
     # levenshteins = {item:get_levenshtein(item) for item in word_comp.keys()}
-    levenshteins_top = {item:get_levenshtein(item) for item in topitemsdict.keys()}
+    levenshteins_top = {item: get_levenshtein(
+        item) for item in topitemsdict.keys()}
 
     # x = [levenshteins[item] for item in stdevs.keys()]
     # y = [stdevs[item] for item in stdevs.keys()]
@@ -254,7 +260,8 @@ def evaluate_corpus(file, num_lines=6000, hand='Both', voynich=False):
 
 
 def main():
-    corpora = ['data/war_peace.txt', 'data/don_quixote.txt', 'data/great_expectations.txt']
+    corpora = ['data/war_peace.txt', 'data/don_quixote.txt',
+               'data/great_expectations.txt']
     voynich_file = 'data/voynich_data.txt'
 
     corpora_output = {}
