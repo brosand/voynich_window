@@ -254,30 +254,15 @@ def evaluate_corpus(file, num_lines=6000, hand='Both', voynich=False):
 
 
 def main():
-    corpora = ['war_peace_test.txt']
+    corpora = ['war_peace.txt', 'don_quixote.txt', 'great_expectations.txt']
     voynich_file = 'voynich_data.txt'
 
     corpora_output = {}
 
     for corpus in corpora:
-        corpora_output[corpus] = evaluate_corps(corpus)
+        corpora_output[corpus] = evaluate_corpus(corpus)
 
     topitems_v, stdevs_v, lev_top_v, comp_count_v = evaluate_corpus(voynich_file, voynich=True)
-
-    # f = 'voynich_data.txt'
- 
-    # str_list_output = create_df(f, hand)
-    # # count_bad = sum([not c.isalnum() for paragraph in str_list_output for c in paragraph])
-    # # count_good = sum([c.isalnum() for paragraph in str_list_output for c in paragraph])
-    # word_comp, comp_count = gen_comps(str_list_output)
-    # topitems, stdevs, levenshteins = analysis(word_comp, comp_count)
-
-    # war_peace_strs = convert_to_strings('war_peace_test.txt', 6000)
-    # word_comp_eng, comp_count_eng = gen_comps(war_peace_strs)
-    # # word_comp_eng = {a:word_comp_eng[a] if word_comp_eng[a] !=0 for a in word_comp_eng.keys()]
-    # topitems_eng, stdevs_eng, levenshteins_eng = analysis(word_comp_eng, comp_count_eng)
-
-    # return topitems, comp_count, word_comp, stdevs, levenshteins
 
 if __name__ == "__main__":
     main()
