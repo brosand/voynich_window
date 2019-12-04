@@ -217,8 +217,7 @@ def analysis(word_comp, comp_count, n=1000):
     topitems = heapq.nlargest(n, comp_count.items(), key=itemgetter(1))
 
     topitemsdict = dict(topitems)
-    topitemsdict = {item: topitemsdict[item] for item in topitemsdict.keys()
-                    if (item[0].isalpha() and item[1].isalpha())}
+    topitemsdict = {item: word_comp[item] for item in topitemsdict.keys() if (item[0].isalpha() and item[1].isalpha())}
     top_comps = {item: word_comp[item] for item in topitemsdict.keys()}
 
     # pair = list(top_comps.keys())[0]
@@ -237,13 +236,13 @@ def analysis(word_comp, comp_count, n=1000):
     levenshteins_top = {item: get_levenshtein(
         item) for item in topitemsdict.keys()}
 
-    x = [levenshteins_top[item] for item in stdevs.keys()]
-    y = [stdevs[item] for item in stdevs.keys()]
-    y1 = [comp_count[item] for item in stdevs.keys()]
-    # y2 = [median_dist[item] for item in stdevs.keys()]
-    plt.scatter(x,y1)
-    plt.scatter(x,y)
-    plt.scatter(y,y1)
+    # x = [levenshteins_top[item] for item in stdevs.keys()]
+    # y = [stdevs[item] for item in stdevs.keys()]
+    # y1 = [comp_count[item] for item in stdevs.keys()]
+    # # y2 = [median_dist[item] for item in stdevs.keys()]
+    # plt.scatter(x,y1)
+    # plt.scatter(x,y)
+    # plt.scatter(y,y1)
 
     return topitemsdict, stdevs, levenshteins_top, comp_count
 
@@ -253,8 +252,8 @@ def evaluate_corpus(file, num_lines=6000, hand='Both', voynich=False):
         paragraphs = create_df(file, hand)
     else:
         paragraphs = convert_to_strings(file, num_lines)
-    word_comp, comp_count = gen_comps(paragraphs, weighted=True)
-    return analysis(word_comp, comp_count)
+    word_comp, comp_count = gen_comps(paragraphs, weighted=False)
+    return analysis(word_comp, comp_count, n=10000)
 
 
 def main():
