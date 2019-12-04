@@ -1,7 +1,8 @@
 import heapq
-from collections import defaultdict
-from itertools import combinations
+from collections import defaultdict, Counter
+from itertools import combinations, chain
 from operator import itemgetter
+import math
 
 import pandas as pd
 from parse import *
@@ -163,8 +164,12 @@ def create_df(file, hand):
         str_list_output = convert_to_strings_voynich(df)
     return str_list_output
 
+def words_weight(word_pair, size_of_corpus, cnt):
+    
+    frac = math.log(min(size_of_corpus / cnt[word_pair[0]], size_of_corpus / cnt[word_pair[1]]))
+    return frac
 
-def gen_comps(str_list_output, neg_dist=1):
+def gen_comps(str_list_output, neg_dist=1, weighted=False):
     word_comp = defaultdict(list)
     comp_count = defaultdict(lambda: 0)
     for paragraph in str_list_output:
@@ -198,26 +203,16 @@ def gen_comps(str_list_output, neg_dist=1):
                     word_comp[word1, word_2].append(m)
                     comp_count[word1, word_2] += 1
 
-            # for k, word in enumerate(window):
-            #     for m, word_2 in enumerate(window[(k+1):]):
-            #         if comp_count[word, word_2] == 0:
-            #             if comp_count[word_2, word] == 0:
-            #                 word_comp[word, word_2].append(m)
-            #                 comp_count[word,word_2] += 1
-            #             else:
-            #                 word_comp[word_2, word].append(neg_dist * m)
-            #                 comp_count[word_2, word] += 1
-            #         else:
-            #             word_comp[word, word_2].append(m)
-            #             comp_count[word,word_2] += 1
-            # for comb in combinations(window, 3):
-            #
-            #     word_comp[comb] += 2
-            #     word_comb[comb].append(dist)
+    if weighted==True:
+        raise NotImplementedError
+        # l = sum([len(line) for line in str_list_output])
+        # cnt = Counter(list(chain(*str_list_output)))
+        # for comp in comp_count.keys():
+        #     comp_count[comp] = comp_count[comp] * words_weight(comp, l, cnt)
     return word_comp, comp_count
 
 
-def analysis(word_comp, comp_count, n=10000):
+def analysis(word_comp, comp_count, n=1000):
 
     topitems = heapq.nlargest(n, comp_count.items(), key=itemgetter(1))
 
@@ -242,10 +237,13 @@ def analysis(word_comp, comp_count, n=10000):
     levenshteins_top = {item: get_levenshtein(
         item) for item in topitemsdict.keys()}
 
-    # x = [levenshteins[item] for item in stdevs.keys()]
-    # y = [stdevs[item] for item in stdevs.keys()]
-    # y1 = [comp_count[item] for item in stdevs.keys()]
+    x = [levenshteins_top[item] for item in stdevs.keys()]
+    y = [stdevs[item] for item in stdevs.keys()]
+    y1 = [comp_count[item] for item in stdevs.keys()]
     # y2 = [median_dist[item] for item in stdevs.keys()]
+    plt.scatter(x,y1)
+    plt.scatter(x,y)
+    plt.scatter(y,y1)
 
     return topitemsdict, stdevs, levenshteins_top, comp_count
 
@@ -255,7 +253,7 @@ def evaluate_corpus(file, num_lines=6000, hand='Both', voynich=False):
         paragraphs = create_df(file, hand)
     else:
         paragraphs = convert_to_strings(file, num_lines)
-    word_comp, comp_count = gen_comps(paragraphs)
+    word_comp, comp_count = gen_comps(paragraphs, weighted=True)
     return analysis(word_comp, comp_count)
 
 
