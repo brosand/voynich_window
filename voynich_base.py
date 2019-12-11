@@ -46,7 +46,17 @@ def parse_line(line):
     return parsed, line_type
 
 
-def convert_to_strings(big_text, line_count=5000):
+def convert_to_strings(big_text, lines=True, line_count=5000):
+    if not lines:
+        with open(big_text) as corpus:
+            paragraphs = []
+            line = corpus.readline().rstrip('\n')
+            line = line.split(" ")
+            for i in range(line_count):
+                section = line[i*10:(i*10 + 10)]
+                tmp = (' ').join(section)
+                paragraphs.append(tmp)
+                # paragraphs.append[' '.join(line[i*10:(i*10+10)])]
 
     with open(big_text) as corpus:
         paragraphs = []
@@ -212,7 +222,7 @@ def gen_comps(str_list_output, neg_dist=1, weighted=False):
     return word_comp, comp_count
 
 
-def analysis(word_comp, comp_count, n=1000):
+def analysis(word_comp, comp_count, n=5000):
 
     topitems = heapq.nlargest(n, comp_count.items(), key=itemgetter(1))
 
@@ -247,26 +257,43 @@ def analysis(word_comp, comp_count, n=1000):
     return topitemsdict, stdevs, levenshteins_top, comp_count
 
 
-def evaluate_corpus(file, num_lines=6000, hand='Both', voynich=False):
+def evaluate_corpus(file, lines=True, num_lines=6000, hand='Both', voynich=False):
     if voynich:
         paragraphs = create_df(file, hand)
+    # elif lines:
+    #     paragraphs = convert_to_strings(file, num_lines)
     else:
-        paragraphs = convert_to_strings(file, num_lines)
+        paragraphs = convert_to_strings(file, lines, num_lines)
     word_comp, comp_count = gen_comps(paragraphs, weighted=False)
-    return analysis(word_comp, comp_count, n=10000)
+    return analysis(word_comp, comp_count, n=1000)
 
+
+def focus_corpus(corpora_output, fin):
+    output = corpora_output[fin]
+    # output = corpora_output[voynich_file]
+    topitemsdict = output[0]
+    le = output[2]
+    plt.hist(le.values(), bins=[0,1,2,3,4,5,6,7])
 
 def main():
     corpora = ['data/war_peace.txt', 'data/don_quixote.txt',
-               'data/great_expectations.txt', '60878-0.txt']
+               'data/great_expectations.txt', 'data/60878-0.txt']
+    wiki_corpora = ['data/russian_wiki.txt', 'data/arabic_wiki.txt']
+    # wiki_corpora = ['data/xaa.txt', 'data/arabic_wiki.txt']
+    # wiki_corpora = ['data/xaa']
     voynich_file = 'data/voynich_data.txt'
 
     corpora_output = {}
 
     for corpus in corpora:
         corpora_output[corpus] = evaluate_corpus(corpus)
+    
+    for corpus in wiki_corpora:
+        corpora_output[corpus] = evaluate_corpus(corpus, lines=False)
 
-    corpora_output[voynich_file] = evaluate_corpus(voynich_file, voynich=True)
+    corpora_output[voynich_file] = evaluate_corpus(voynich_file, hand='B', voynich=True)
+    # for corpora in corpora_output.values():
+        # plt.savefig()
     return corpora_output
 
 
