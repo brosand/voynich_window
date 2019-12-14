@@ -290,6 +290,7 @@ def main():
     
     for corpus in wiki_corpora:
         corpora_output[corpus] = evaluate_corpus(corpus, lines=False)
+        
 
     corpora_output[voynich_file] = evaluate_corpus(voynich_file, hand='B', voynich=True)
     # for corpora in corpora_output.values():
