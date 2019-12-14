@@ -46,7 +46,7 @@ def parse_line(line):
     return parsed, line_type
 
 
-def convert_to_strings(big_text, lines=True, line_count=5000):
+def convert_to_strings(big_text, lines=True, line_count=6000):
     if not lines:
         with open(big_text) as corpus:
             paragraphs = []
@@ -257,7 +257,7 @@ def analysis(word_comp, comp_count, n=5000):
     return topitemsdict, stdevs, levenshteins_top, comp_count
 
 
-def evaluate_corpus(file, lines=True, num_lines=6000, hand='Both', voynich=False):
+def evaluate_corpus(file, lines=True, num_lines=6000, hand='Both', voynich=False, n=5000):
     if voynich:
         paragraphs = create_df(file, hand)
     # elif lines:
@@ -265,34 +265,53 @@ def evaluate_corpus(file, lines=True, num_lines=6000, hand='Both', voynich=False
     else:
         paragraphs = convert_to_strings(file, lines, num_lines)
     word_comp, comp_count = gen_comps(paragraphs, weighted=False)
-    return analysis(word_comp, comp_count, n=1000)
+    return analysis(word_comp, comp_count, n=n)
 
 
-def focus_corpus(corpora_output, fin):
+def focus_corpus(corpora_output, fin, tag=''):
     output = corpora_output[fin]
     # output = corpora_output[voynich_file]
     topitemsdict = output[0]
     le = output[2]
-    plt.hist(le.values(), bins=[0,1,2,3,4,5,6,7])
+    plt.hist(le.values(), bins=[0,1,2,3,4,5,6,7,8,9,10,11,12])
+    plt.title(fin + tag)
+    plt.savefig('output/'+ fin + tag + '.png')
+    plt.clf()
 
 def main():
-    corpora = ['data/war_peace.txt', 'data/don_quixote.txt',
-               'data/great_expectations.txt', 'data/60878-0.txt']
-    wiki_corpora = ['data/russian_wiki.txt', 'data/arabic_wiki.txt']
+    corpora = ['war_peace.txt', 'don_quixote.txt',
+               'great_expectations.txt', '60878-0.txt']
+    wiki_corpora = ['russian_wiki.txt', 'arabic_wiki.txt', 'Basque',
+                'Chinese', 'Latvian', 'Latin', 'Macedonian']
+    gibberish = ['Non-Specialist/DA_01.txt', 
+    'Non-Specialist/DC_10.txt',
+    'Non-Specialist/DC_08.txt',
+    'Non-Specialist/DC_11.txt',]
     # wiki_corpora = ['data/xaa.txt', 'data/arabic_wiki.txt']
     # wiki_corpora = ['data/xaa']
-    voynich_file = 'data/voynich_data.txt'
+    voynich_file = 'voynich_data.txt'
 
     corpora_output = {}
-
+    global_n = 5000
     for corpus in corpora:
-        corpora_output[corpus] = evaluate_corpus(corpus)
-    
-    for corpus in wiki_corpora:
-        corpora_output[corpus] = evaluate_corpus(corpus, lines=False)
-        
+        corpora_output[corpus] = evaluate_corpus('data/' + corpus, n=global_n)
+        focus_corpus(corpora_output, corpus)
 
-    corpora_output[voynich_file] = evaluate_corpus(voynich_file, hand='B', voynich=True)
+    for corpus in wiki_corpora:
+        if corpus=='Chinese':
+            corpora_output[corpus] = evaluate_corpus('data/' + corpus, lines=False, n=1000)
+        else:
+            corpora_output[corpus] = evaluate_corpus('data/' + corpus, lines=False, n=global_n)
+        focus_corpus(corpora_output, corpus)
+    
+    for corpus in gibberish:
+        corpora_output[corpus] = evaluate_corpus('data/' + 'gibberish_voynich/' + corpus, lines=False, n=50)
+        focus_corpus(corpora_output, corpus)
+
+    for hand in ['A', 'B', 'Both']:
+        corpora_output[voynich_file] = evaluate_corpus('data/' + voynich_file, hand=hand, voynich=True, n=global_n)
+        focus_corpus(corpora_output, voynich_file, hand)
+    
     # for corpora in corpora_output.values():
         # plt.savefig()
     return corpora_output
