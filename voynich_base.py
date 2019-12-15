@@ -278,6 +278,21 @@ def focus_corpus(corpora_output, fin, tag=''):
     plt.savefig('output/'+ fin + tag + '.png')
     plt.clf()
 
+def multiple_corpora(corpora_output, fins, title, tag=''):
+    plt.figure(num=None, figsize=(20,20))
+    fig = plt.figure()
+    ax1 = fig.add_subplot(221)
+    ax2 = fig.add_subplot(222)
+    ax3 = fig.add_subplot(223)
+    ax4 = fig.add_subplot(224)
+    ax1.hist(corpora_output[fins[0]][2].values(), bins=list(range(13)))
+    ax2.hist(corpora_output[fins[1]][2].values(), bins=list(range(13)))
+    ax3.hist(corpora_output[fins[2]][2].values(), bins=list(range(13)))
+    ax4.hist(corpora_output[fins[3]][2].values(), bins=list(range(13)))
+    fig.suptitle(title)
+    plt.savefig('output/' + title + '.png')
+    plt.clf()
+
 def main():
     corpora = ['war_peace.txt', 'don_quixote.txt',
                'great_expectations.txt', '60878-0.txt']
@@ -294,23 +309,25 @@ def main():
     corpora_output = {}
     global_n = 5000
     for corpus in corpora:
-        corpora_output[corpus] = evaluate_corpus('data/' + corpus, n=global_n)
-        focus_corpus(corpora_output, corpus)
+        corpora_output[corpus.rstrip('.txt')] = evaluate_corpus('data/' + corpus, n=global_n)
+        focus_corpus(corpora_output, corpus.rstrip('.txt'))
 
     for corpus in wiki_corpora:
         if corpus=='Chinese':
-            corpora_output[corpus] = evaluate_corpus('data/' + corpus, lines=False, n=1000)
+            corpora_output[corpus.rstrip('.txt')] = evaluate_corpus('data/' + corpus, lines=False, n=1000)
         else:
-            corpora_output[corpus] = evaluate_corpus('data/' + corpus, lines=False, n=global_n)
-        focus_corpus(corpora_output, corpus)
+            corpora_output[corpus.rstrip('.txt')] = evaluate_corpus('data/' + corpus, lines=False, n=global_n)
+        focus_corpus(corpora_output, corpus.rstrip('.txt'))
     
     for corpus in gibberish:
-        corpora_output[corpus] = evaluate_corpus('data/' + 'gibberish_voynich/' + corpus, lines=False, n=50)
-        focus_corpus(corpora_output, corpus)
+        corpora_output[corpus.rstrip('.txt')] = evaluate_corpus('data/' + 'gibberish_voynich/' + corpus, lines=False, n=50)
+        focus_corpus(corpora_output, corpus.rstrip('.txt'))
+
+    multiple_corpora(corpora_output, [a.rstrip('.txt') for a in gibberish], 'gibberish_corpora (non-specialist)')
 
     for hand in ['A', 'B', 'Both']:
-        corpora_output[voynich_file] = evaluate_corpus('data/' + voynich_file, hand=hand, voynich=True, n=global_n)
-        focus_corpus(corpora_output, voynich_file, hand)
+        corpora_output[voynich_file.rstrip('.txt')] = evaluate_corpus('data/' + voynich_file, hand=hand, voynich=True, n=global_n)
+        focus_corpus(corpora_output, voynich_file.rstrip('.txt'), hand)
     
     # for corpora in corpora_output.values():
         # plt.savefig()
