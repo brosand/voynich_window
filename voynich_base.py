@@ -282,7 +282,7 @@ def main():
     corpora = ['war_peace.txt', 'don_quixote.txt',
                'great_expectations.txt', '60878-0.txt']
     wiki_corpora = ['russian_wiki.txt', 'arabic_wiki.txt', 'Basque',
-                'Chinese', 'Latvian', 'Latin', 'Macedonian']
+                'Chinese', 'Latvian', 'Latin', 'Macedonian', 'Norweigen_Nyornsk']
     gibberish = ['Non-Specialist/DA_01.txt', 
     'Non-Specialist/DC_10.txt',
     'Non-Specialist/DC_08.txt',
