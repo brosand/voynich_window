@@ -254,7 +254,7 @@ def analysis(word_comp, comp_count, n=5000):
     # plt.scatter(x,y)
     # plt.scatter(y,y1)
 
-    return topitemsdict, stdevs, levenshteins_top, comp_count
+    return topitemsdict, stdevs, levenshteins_top, comp_count, topitems
 
 
 def evaluate_corpus(file, lines=True, num_lines=6000, hand='Both', voynich=False, n=5000):
@@ -332,6 +332,12 @@ def main():
     # for corpora in corpora_output.values():
         # plt.savefig()
     return corpora_output
+# # a = [int(x) for x in (corpora_output[corpora[0].rstrip('.txt')][3]).values()]
+# # plt.bar(range(len(a)), a)
+# a = corpora_output[wiki_corpora[0].rstrip('.txt')][4][:5][0][0]
+# corpora_output[wiki_corpora[0].rstrip('.txt')][0][a]
+
+
 
 
 if __name__ == "__main__":
