@@ -3,6 +3,7 @@ from collections import defaultdict, Counter
 from itertools import combinations, chain
 from operator import itemgetter
 import math
+import os
 
 import pandas as pd
 from parse import *
@@ -292,6 +293,18 @@ def multiple_corpora(corpora_output, fins, title, tag=''):
     fig.suptitle(title)
     plt.savefig('output/' + title + '.png')
     plt.clf()
+    
+def run_on_folder(folder='txts'):
+    corpora_output = {}
+    global_n = 5000
+    for corpus in os.listdir(folder):
+        print(corpus)
+        if corpus=='Chinese':
+            corpora_output[corpus.rstrip('.txt')] = evaluate_corpus(folder + '/' + corpus, lines=False, n=1000)
+        else:
+            corpora_output[corpus.rstrip('.txt')] = evaluate_corpus(folder + '/' + corpus, lines=False, n=global_n)
+        focus_corpus(corpora_output, corpus.rstrip('.txt'))
+        
 
 def main():
     corpora = ['war_peace.txt', 'don_quixote.txt',
