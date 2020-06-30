@@ -53,45 +53,45 @@ def parse_line(line):
 
 
 def convert_to_strings(big_text, lines=True, line_count=6000):
+    failed=False
     if not lines:
         with open(big_text) as corpus:
             paragraphs = []
             try:
                 line = corpus.readline().rstrip('\n')
-                line = line.split(" ")
             except:
                 print('Analysis failed 62')
+                failed=True
                 return None
-            for i in range(line_count):
-                section = line[i*10:(i*10 + 10)]
-                tmp = (' ').join(section)
-                paragraphs.append(tmp)
-                # paragraphs.append[' '.join(line[i*10:(i*10+10)])]
-    with open(big_text) as corpus:
-        paragraphs = []
-        line = corpus.readline().rstrip('\n').rstrip('.')
-        cur_paragraph = []
-        i = 0
-        while line and i < line_count:
-        # for i in tqdm(range(line_count)):
-            # if not line:
-            #     print('noline')
-            #     break
-            cur_paragraph = cur_paragraph + line.split(' ')
-            line = corpus.readline()
-            # try:
-            #     line = corpus.readline()
-            # except:
-            #     print(line)
-            #     print('Analysis failed 81')
-            #     break
-            if not line or line == '\n':
-                paragraphs.append(cur_paragraph)
-                cur_paragraph = []
-            if line != '\n':
-                line = line.rstrip('\n').rstrip('.')
-            i += 1
-        return paragraphs
+    if not failed:
+        line = line.split(" ")
+        for i in range(line_count):
+            section = line[i*10:(i*10 + 10)]
+            tmp = (' ').join(section)
+            paragraphs.append(tmp)
+            # paragraphs.append[' '.join(line[i*10:(i*10+10)])]
+        with open(big_text) as corpus:
+            paragraphs = []
+            line = corpus.readline().rstrip('\n').rstrip('.')
+            cur_paragraph = []
+            # i = 0
+            # while line and i < line_count:
+            for i in tqdm(range(line_count)):
+                if not line:
+                    break
+                cur_paragraph = cur_paragraph + line.split(' ')
+                # try:
+                #     line = corpus.readline()
+                # except:
+                #     print('Analysis failed 81')
+                #     break
+                if not line or line == '\n':
+                    paragraphs.append(cur_paragraph)
+                    cur_paragraph = []
+                if line != '\n':
+                    line = line.rstrip('\n').rstrip('.')
+            # i += 1
+    return paragraphs
 
 
 def convert_to_strings_voynich(df):
@@ -201,6 +201,8 @@ def words_weight(word_pair, size_of_corpus, cnt):
 def gen_comps(str_list_output, neg_dist=1, weighted=False):
     word_comp = defaultdict(list)
     comp_count = defaultdict(lambda: 0)
+    if not str_list_output:
+        return 'fail'
     for paragraph in str_list_output:
         i = 0
         n = 10
@@ -284,9 +286,8 @@ def evaluate_corpus(file, lines=True, num_lines=6000, hand='Both', voynich=False
     else:
         #try:
             paragraphs = convert_to_strings(file, lines, num_lines)
-            # print('paragraphs on line 289' + str(paragraphs))
+            print('paragraph')
             if not paragraphs:
-                print('par' + str(paragraphs))
                 return None
             # print(paragraphs)
             word_comp, comp_count = gen_comps(paragraphs, weighted=False)
@@ -326,7 +327,6 @@ def run_on_folder(folder='txts'):
     global_n = 5000
     last_time = time.time()
     for corpus in os.listdir(folder):
-        # corpus = 'Catalan.txt'
 #        print(os.path.exists('output/' + corpus.rstrip('.txt') + '.png'))
         if os.path.exists('output/' + corpus.rstrip('.txt') + '.png'):
             print(corpus + " already evaluated")
@@ -338,17 +338,12 @@ def run_on_folder(folder='txts'):
         if corpus=='Chinese':
             corpora_output[corpus.rstrip('.txt')] = evaluate_corpus(folder + '/' + corpus, lines=False, n=1000)
         else:
-            tmp_output = evaluate_corpus(folder + '/' + corpus, lines=False, n=global_n)
-            if tmp_output == None:
-                print("No output")
-                continue
-            corpora_output[corpus.rstrip('.txt')] = tmp_output
-            # print(evaluate_corpus(folder + '/' + corpus, lines=False, n=global_n))
-        # if None not in corpora_output.values():
-        focus_corpus(corpora_output, corpus.rstrip('.txt'))
-        # else:
-            # print(corpora_output.values())
-            # print("Analysis failed")
+            corpora_output[corpus.rstrip('.txt')] = evaluate_corpus(folder + '/' + corpus, lines=False, n=global_n)
+        if None not in corpora_output.values():
+            focus_corpus(corpora_output, corpus.rstrip('.txt'))
+        else:
+            print(corpora_output.values())
+            print("Analysis failed")
         
 
 def main():

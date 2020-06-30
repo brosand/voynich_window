@@ -1,3 +1,4 @@
 txts/
 output/
 __pycache__/
+*.png
